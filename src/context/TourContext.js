@@ -1,0 +1,27 @@
+import React, { createContext } from 'react';
+
+export const TourContext = createContext({
+  isTourActive: false,
+  tourType: 'user',
+  steps: [],
+  currentStepIndex: 0,
+  currentStep: null,
+  totalSteps: 0,
+  isWelcomeVisible: false,
+  isFinishVisible: false,
+  isSkipConfirmVisible: false,
+  targetLayouts: {},
+  activeTargetRect: null,
+  startTour: () => {},
+  nextStep: () => {},
+  previousStep: () => {},
+  skipTour: () => {},
+  confirmSkipTour: () => {},
+  cancelSkipTour: () => {},
+  finishTour: () => {},
+  restartTour: () => {},
+  checkAndShowUserTour: () => {},
+  registerTarget: () => {},
+  unregisterTarget: () => {},
+  registerNavigator: () => {},
+});

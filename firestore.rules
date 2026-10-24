@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isActiveAdmin() {
+      return isAuthenticated() && 
+        (getUserData().status == 'active' || !('status' in getUserData())) &&
+        (getUserData().role == 'admin' || getUserData().role == 'superadmin');
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && 
+        getUserData().role == 'superadmin' &&
+        (getUserData().status == 'active' || !('status' in getUserData()));
+    }
+
+    // Users Collection (Admin accounts)
+    match /users/{userId} {
+      // Authenticated admins can view admin profiles
+      allow read: if isAuthenticated();
+      
+      // Allow user to write their own profile doc if it doesn't exist yet (auto-bootstrap)
+      // or if requester is superadmin
+      allow create: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+      allow update: if isSuperAdmin() || (isAuthenticated() && request.auth.uid == userId && !('role' in request.resource.data && request.resource.data.role != resource.data.role));
+      allow delete: if isSuperAdmin();
+    }
+
+    // Students Collection
+    match /students/{studentId} {
+      allow read, write: if isActiveAdmin();
+    }
+
+    // Fee Structures
+    match /fee_structures/{classId} {
+      allow read, write: if isActiveAdmin();
+    }
+    match /feeStructures/{classId} {
+      allow read, write: if isActiveAdmin();
+    }
+
+    // Fee Payments & Receipts
+    match /fee_payments/{paymentId} {
+      allow read, write: if isActiveAdmin();
+    }
+    match /feePayments/{paymentId} {
+      allow read, write: if isActiveAdmin();
+    }
+
+    // Student & Teacher Attendance
+    match /attendance/{dateKey} {
+      allow read, write: if isActiveAdmin();
+    }
+
+    // Faculty & Staff
+    match /teachers/{teacherId} {
+      allow read, write: if isActiveAdmin();
+    }
+
+    // Monthly Salaries
+    match /salaries/{salaryId} {
+      allow read, write: if isActiveAdmin();
+    }
+
+    // Admission Enquiries (Public parents can submit enquiries; Admins can manage)
+    match /enquiries/{enquiryId} {
+      allow create: if true; // Public submission from admission desk
+      allow read, update, delete: if isActiveAdmin();
+    }
+
+    // Audit Logging
+    match /admin_activity/{activityId} {
+      allow read: if isSuperAdmin() || isActiveAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Audit records are immutable
+    }
+    match /adminActivity/{activityId} {
+      allow read: if isSuperAdmin() || isActiveAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+  }
+}
