@@ -11,7 +11,7 @@ import { Platform } from "react-native";
 
 // Web & Mobile Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDMn7zVPgjZGSJkG0eLErKc4zWxANLeAro",
+  apiKey: "AIzaSyDMn7zVPgjZGSJkG*****Kc4zWxANLeAro",
   authDomain: "rpsadminpanel.firebaseapp.com",
   projectId: "rpsadminpanel",
   storageBucket: "rpsadminpanel.firebasestorage.app",
